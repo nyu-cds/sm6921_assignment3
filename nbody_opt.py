@@ -1,72 +1,63 @@
 """
     Author: Saurabh Mahajan
     Netid: sm6921
-    Execution Time: 38.45s
-    Relative speedup = (113.92/38.45) = 2.96
+    Execution Time: 33.57s
+    Relative speedup = (113.92/31.159) = 3.65
     N-body simulation.
 """
-import time
 
-def advance(BODIES, iterations):
-    '''
-        advance the system one timestep
-    '''
-    dt = 0.01
-    TOTAL_BODIES = BODIES.keys()
+from itertools import combinations
+
+def advance(BODIES, iterations, dt, values):
+    
     for _ in range(iterations):
-        seenit = dict()
-        for body1 in TOTAL_BODIES:
+        for body1, body2 in combinations(BODIES, 2):
             ([x1, y1, z1], v1, m1) = BODIES[body1]
-            for body2 in TOTAL_BODIES:
-                if (body1 != body2) and not (body2 in seenit):
-                    ([x2, y2, z2], v2, m2) = BODIES[body2]
-                    (dx, dy, dz) = (x1 - x2, y1 - y2, z1 - z2)
-                    tmp = dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
-                    m2_tmp = m2 * tmp
-                    m1_tmp = m1 * tmp
-                    v1[0] -= dx * m2_tmp
-                    v1[1] -= dy * m2_tmp
-                    v1[2] -= dz * m2_tmp
-                    v2[0] += dx * m1_tmp
-                    v2[1] += dy * m1_tmp
-                    v2[2] += dz * m1_tmp
-                    seenit[body1] = True
+            ([x2, y2, z2], v2, m2) = BODIES[body2]
+            dx = x1-x2
+            dy = y1-y2
+            dz = z1-z2
+            tmp = dt * ((dx * dx + dy * dy + dz * dz) ** (-1.5))
+            m2_tmp = m2 * tmp
+            m1_tmp = m1 * tmp
+            v1[0] -= dx * m2_tmp
+            v1[1] -= dy * m2_tmp
+            v1[2] -= dz * m2_tmp
+            v2[0] += dx * m1_tmp
+            v2[1] += dy * m1_tmp
+            v2[2] += dz * m1_tmp
             
-        for body in TOTAL_BODIES:
-            (r, [vx, vy, vz], m) = BODIES[body]
+        for body in values:
+            (r, [vx, vy, vz], m) = body
             r[0] += dt * vx
             r[1] += dt * vy
             r[2] += dt * vz
     
-def report_energy(BODIES, e=0.0):
+def report_energy(BODIES, values, e=0.0):
     '''
         compute the energy and return it so that it can be printed
     '''
-    seenit = dict()
-    TOTAL_BODIES = BODIES.keys()
-    for body1 in TOTAL_BODIES:
+    for body1, body2 in combinations(BODIES, 2):
         ((x1, y1, z1), v1, m1) = BODIES[body1]
-        for body2 in TOTAL_BODIES:
-            if (body1 != body2) and (body2 not in seenit):
-                ((x2, y2, z2), v2, m2) = BODIES[body2]
-                (dx, dy, dz) = (x1 - x2, y1 - y2, z1 - z2)
-                e -= (m1 * m2) / ((dx * dx + dy * dy + dz * dz) ** 0.5)
-                seenit[body1] = True
+        ((x2, y2, z2), v2, m2) = BODIES[body2]
+        dx = x1-x2
+        dy = y1-y2
+        dz = z1-z2
+        e -= (m1 * m2) / ((dx * dx + dy * dy + dz * dz) ** 0.5)
         
-    for body in TOTAL_BODIES:
-        (r, [vx, vy, vz], m) = BODIES[body]
+    for body in values:
+        (r, [vx, vy, vz], m) = body
         e += m * (vx * vx + vy * vy + vz * vz) / 2.
         
     return e
 
-def offset_momentum(BODIES, ref, px=0.0, py=0.0, pz=0.0):
+def offset_momentum(BODIES, ref, values, px=0.0, py=0.0, pz=0.0):
     '''
         ref is the body in the center of the system
         offset values from this reference
     '''
-    TOTAL_BODIES = BODIES.keys()
-    for body in TOTAL_BODIES:
-        (r, [vx, vy, vz], m) = BODIES[body]
+    for body in values:
+        (r, [vx, vy, vz], m) = body
         px -= vx * m
         py -= vy * m
         pz -= vz * m
@@ -124,14 +115,15 @@ def nbody(loops, reference, iterations):
                     5.15138902046611451e-05 * SOLAR_MASS)}
 
     # Set up global state
-    offset_momentum(BODIES, BODIES[reference])
-
+    values = BODIES.values()
+    offset_momentum(BODIES, BODIES[reference], values)
     for _ in range(loops):
-        report_energy(BODIES) #unnecessary function call.
-        advance(BODIES, iterations)
-        print(report_energy(BODIES))
+        report_energy(BODIES, values)
+        advance(BODIES, iterations, 0.01, values)
+        print(report_energy(BODIES, values))
 
 if __name__ == '__main__':
+    import time
     t1 = time.time()
     nbody(100, 'sun', 20000)
     t2= time.time()
