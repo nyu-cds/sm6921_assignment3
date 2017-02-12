@@ -137,8 +137,7 @@ def nbody(loops, reference, iterations):
         for _ in range(iterations):
             advance(0.01)
         print(report_energy())
-import timeit
-print(timeit.timeit(nbody(100,'sun',20000), number=1))
-# if __name__ == '__main__':
-#     nbody(100, 'sun', 20000)
+
+if __name__ == '__main__':
+    nbody(100, 'sun', 20000)
 
