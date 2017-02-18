@@ -9,8 +9,10 @@
 from itertools import combinations
 
 def advance(BODIES, iterations, dt, values):
-    
     for _ in range(iterations):
+        '''
+            advance by one time step
+        '''
         for body1, body2 in combinations(BODIES, 2):
             ([x1, y1, z1], v1, m1) = BODIES[body1]
             ([x2, y2, z2], v2, m2) = BODIES[body2]
