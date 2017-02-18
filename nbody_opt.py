@@ -51,7 +51,7 @@ def report_energy(BODIES, values, e=0.0):
         
     return e
 
-def offset_momentum(BODIES, ref, values, px=0.0, py=0.0, pz=0.0):
+def offset_momentum(ref, values, px=0.0, py=0.0, pz=0.0):
     '''
         ref is the body in the center of the system
         offset values from this reference
@@ -116,7 +116,7 @@ def nbody(loops, reference, iterations):
 
     # Set up global state
     values = BODIES.values()
-    offset_momentum(BODIES, BODIES[reference], values)
+    offset_momentum(BODIES[reference], values)
     for _ in range(loops):
         report_energy(BODIES, values)
         advance(BODIES, iterations, 0.01, values)
