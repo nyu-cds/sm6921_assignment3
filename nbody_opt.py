@@ -7,13 +7,12 @@
 """
 
 from itertools import combinations
-
-def advance(BODIES, iterations, dt, values):
+def advance(BODIES, combination, iterations, dt, values):
     for _ in range(iterations):
         '''
             advance by one time step
         '''
-        for body1, body2 in combinations(BODIES, 2):
+        for body1, body2 in combination:
             ([x1, y1, z1], v1, m1) = BODIES[body1]
             ([x2, y2, z2], v2, m2) = BODIES[body2]
             dx = x1-x2
@@ -35,11 +34,11 @@ def advance(BODIES, iterations, dt, values):
             r[1] += dt * vy
             r[2] += dt * vz
     
-def report_energy(BODIES, values, e=0.0):
+def report_energy(BODIES, combination, values, e=0.0):
     '''
         compute the energy and return it so that it can be printed
     '''
-    for body1, body2 in combinations(BODIES, 2):
+    for body1, body2 in combination:
         ((x1, y1, z1), v1, m1) = BODIES[body1]
         ((x2, y2, z2), v2, m2) = BODIES[body2]
         dx = x1-x2
@@ -119,10 +118,11 @@ def nbody(loops, reference, iterations):
     # Set up global state
     values = BODIES.values()
     offset_momentum(BODIES[reference], values)
+    combination = list(combinations(BODIES, 2))
     for _ in range(loops):
-        report_energy(BODIES, values)
-        advance(BODIES, iterations, 0.01, values)
-        print(report_energy(BODIES, values))
+        report_energy(BODIES, combination[:], values)
+        advance(BODIES, combination[:], iterations, 0.01, values)
+        print(report_energy(BODIES, combination[:], values))
 
 if __name__ == '__main__':
     import time
